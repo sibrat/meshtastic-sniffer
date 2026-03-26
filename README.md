@@ -57,3 +57,9 @@ current configuration and status can be readed using following commands:
 {"jsonrpc": "2.0", "method": "get_lora", "id": 1}
 
 {"jsonrpc": "2.0", "method": "get_mqtt", "id": 1}
+
+# Usage
+
+All received packets sended via serial in JSON format, where 'status' is LoRa status (7 == ok, 9 == bad crc) and packet is base64 encoded meshtastic protobuf packet.
+Also packets with good crc sended via UDP in binary meshtastic protobuf to bradcast port 3303.
+Packest with bad crc to port 3302 accordingly.
