@@ -1,0 +1,16 @@
+*MeshPacket.encrypted max_size:240
+*MeshPacket.public_key max_size:32
+*MeshPacket.hop_limit int_size:8
+*MeshPacket.hop_start int_size:8
+*MeshPacket.channel int_size:8
+*MeshPacket.next_hop int_size:8
+*MeshPacket.relay_node int_size:8
+
+*ServiceEnvelope.channel_id max_size:16
+*ServiceEnvelope.gateway_id max_size:10
+
+*User.id max_size:9
+*User.long_name max_size:32
+*User.short_name max_size:4
+
+*Data.payload max_size:240
