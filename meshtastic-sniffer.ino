@@ -70,14 +70,13 @@ char read_line_buf[1024];
 int read_line_buf_pos;
 uint32_t seen[64];    //array of already seen packets ids
 int seen_pos;
-char nodeid[9];
+char nodeId[9];
 #ifdef MQTT
   #include <MQTT.h>
   WiFiClient net;
   MQTTClient mqtt;
   char mqttTopic[64];
   char mqttChannel[16];
-  char mqttId[10];
 #endif
 
 void setup() {
@@ -85,9 +84,9 @@ void setup() {
   Serial.print("Meshtastic receiver ");
   uint8_t mac[6];
   if (ESP_OK == esp_efuse_mac_get_default(mac)){
-    sprintf(nodeid, "!%02x%02x%02x%02x", mac[2], mac[3], mac[4], mac[5]);
+    sprintf(nodeId, "!%02x%02x%02x%02x", mac[2], mac[3], mac[4], mac[5]);
   }
-  Serial.println(nodeid);
+  Serial.println(nodeId);
   preferences.begin("wifi", true); // namespace, readonly
   bool doesExist = preferences.isKey("ssid");
   if (doesExist == false) {
@@ -128,7 +127,7 @@ void setup() {
   strcat(mqttTopic, "/e/");
   strcat(mqttTopic, mqttChannel);
   strcat(mqttTopic, "/");
-  strcat(mqttTopic, mqttId);
+  strcat(mqttTopic, nodeId);
   preferences.end();
 #endif
 #ifdef SX1276chip
@@ -220,11 +219,11 @@ void loop() {
 // dump encoded protobuf to console as json:
     unsigned char base64[512];
 #ifdef MQTT
-    uint8_t protobufferMQTT[sizeof(protobuffer)+sizeof(mqttTopic)+sizeof(mqttId)];
+    uint8_t protobufferMQTT[sizeof(protobuffer)+sizeof(mqttTopic)+sizeof(nodeId)];
     pb_ostream_t streamMQTT = pb_ostream_from_buffer(protobufferMQTT, sizeof(protobufferMQTT));
     ServiceEnvelope MQTTmsg = ServiceEnvelope_init_zero;
     strcpy(MQTTmsg.channel_id,mqttChannel);
-    strcpy(MQTTmsg.gateway_id,mqttId);
+    strcpy(MQTTmsg.gateway_id,nodeId);
     MQTTmsg.packet = packet;
     MQTTmsg.has_packet = 1;
     s = pb_encode(&streamMQTT, ServiceEnvelope_fields, &MQTTmsg);
@@ -502,7 +501,7 @@ void MQTTconnect() {
   String u = preferences.getString("mqttUser", "");
   String p = preferences.getString("passwrd", "");
   preferences.end();
-  mqtt.connect(nodeid, u.c_str(), p.c_str());
+  mqtt.connect(nodeId, u.c_str(), p.c_str());
   delay(1000);
   if (mqtt.connected()){
     Serial.println("connected!");
