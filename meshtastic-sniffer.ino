@@ -1,4 +1,4 @@
-#define HELTECV2	//supported boards: DIYV1, HELTECV2, TTGO
+#define TTGO	//supported boards: DIYV1, HELTECV2, TTGO
 #define MQTT  // enable sending to mqtt server
 #define UDPENABLED   // enable sending via UDP broadcast
 const uint16_t syncWord = 0x2b;
@@ -209,7 +209,6 @@ void loop() {
         seen_pos = 0;
       }
     }
-
 // encode meshpacket protobuf:
     bool s = pb_encode(&stream, MeshPacket_fields, &packet);
     if (!s){
@@ -262,7 +261,6 @@ void loop() {
     }
   }
 }
-
 void connectToWiFi(const char *ssid, const char *pwd) {
   Serial.println("Connecting to WiFi network: " + String(ssid));
   // delete old config
@@ -274,7 +272,6 @@ void connectToWiFi(const char *ssid, const char *pwd) {
   WiFi.begin(ssid, pwd);
   Serial.println("Waiting for WIFI connection...");
 }
-
 void WiFiEvent(WiFiEvent_t event) {
   switch (event) {
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
@@ -340,8 +337,6 @@ void handleJsonRpc(){
     resDoc["result"] = "ok";
     serializeJson(resDoc, buf, sizeof(buf));
     Serial.println(buf);
-    delay(1000);
-    ESP.restart();
   }else if (reqDoc["method"] == "setup_lora"){
     JsonObject params = reqDoc["params"];
     preferences.begin("lora", false);
@@ -365,8 +360,6 @@ void handleJsonRpc(){
     resDoc["result"] = "ok";
     serializeJson(resDoc, buf, sizeof(buf));
     Serial.println(buf);
-    delay(1000);
-    ESP.restart();
   }else if (reqDoc["method"] == "get_wifi"){
     JsonObject result = resDoc.createNestedObject("result");
     preferences.begin("wifi", true);
@@ -439,8 +432,6 @@ void handleJsonRpc(){
     resDoc["result"] = "ok";
     serializeJson(resDoc, buf, sizeof(buf));
     Serial.println(buf);
-    delay(1000);
-    ESP.restart();
   }else if (reqDoc["method"] == "get_mqtt"){
     JsonObject result = resDoc.createNestedObject("result");
     preferences.begin("mqtt", true);
@@ -454,6 +445,12 @@ void handleJsonRpc(){
     serializeJson(resDoc, buf, sizeof(buf));
     Serial.println(buf);
 #endif
+  }else if (reqDoc["method"] == "restart"){
+    resDoc["result"] = "ok";
+    serializeJson(resDoc, buf, sizeof(buf));
+    Serial.println(buf);
+    delay(1000);
+    ESP.restart();    
   }else{
     JsonObject errorObj = resDoc.createNestedObject("error");
     errorObj["code"] = -32601;
@@ -496,17 +493,19 @@ void MQTTconnect() {
     return;
   }
   preferences.begin("mqtt", true);
-  String host = preferences.getString("host", "");
-  Serial.println("connecting to mqtt host " + host);
-  String u = preferences.getString("mqttUser", "");
-  String p = preferences.getString("passwrd", "");
-  preferences.end();
-  mqtt.connect(nodeId, u.c_str(), p.c_str());
-  delay(1000);
-  if (mqtt.connected()){
-    Serial.println("connected!");
-  }else{
-    Serial.println("time out!");
+  if (preferences.isKey("host")){
+    String host = preferences.getString("host", "");
+    Serial.println("connecting to mqtt host " + host);
+    String u = preferences.getString("mqttUser", "");
+    String p = preferences.getString("passwrd", "");
+    mqtt.connect(nodeId, u.c_str(), p.c_str());
+    delay(1000);
+    if (mqtt.connected()){
+      Serial.println("connected!");
+    }else{
+      Serial.println("time out!");
+    }
   }
+  preferences.end();
 }
 #endif
