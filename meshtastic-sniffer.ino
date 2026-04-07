@@ -197,16 +197,18 @@ void loop() {
     uint8_t status = LoRa.status();
 //
     bool is_seen = false;
-    for (int i = 0; i < sizeof(seen) / sizeof(seen[0]); i++) {
+    if (status==7){ //count duplicates only for valid packets
+      for (int i = 0; i < sizeof(seen) / sizeof(seen[0]); i++) {
         if (pid == seen[i]){
             is_seen = true;
         }
-    }
-    if (!is_seen){
-      seen[seen_pos] = pid;
-      seen_pos++;
-      if (seen_pos >= sizeof(seen) / sizeof(seen[0])){
-        seen_pos = 0;
+      }
+      if (!is_seen){
+        seen[seen_pos] = pid;
+        seen_pos++;
+        if (seen_pos >= sizeof(seen) / sizeof(seen[0])){
+          seen_pos = 0;
+        }
       }
     }
 // encode meshpacket protobuf:
